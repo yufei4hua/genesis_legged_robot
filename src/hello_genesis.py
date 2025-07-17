@@ -42,6 +42,7 @@ joints_name = [
 num_actuated_joints = len(joints_name)
 print("Ainex All Joints:", len(joints_name), joints_name)
 motors_dof_idx = [ainex.get_joint(name).dofs_idx_local[0] for name in joints_name]
+print(motors_dof_idx)
 
 ainex.set_dofs_kp(kp=np.ones(num_actuated_joints) * 100.0, dofs_idx_local=motors_dof_idx)
 ainex.set_dofs_kv(kv=np.ones(num_actuated_joints) * 20.0, dofs_idx_local=motors_dof_idx)
@@ -55,8 +56,8 @@ q_home = np.array(
         [0.0, 0.0,                      # 'head_pan', 'head_tilt',                                                  # 头部
          0.0,-1.4, 0.0, 0.0, 0.0,       # 'l_sho_pitch', 'l_sho_roll', 'l_el_pitch', 'l_el_yaw', 'l_gripper',       # 左手
          0.0, 1.4, 0.0, 0.0, 0.0,       # 'r_sho_pitch', 'r_sho_roll', 'r_el_pitch', 'r_el_yaw', 'r_gripper',       # 右手
-         0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  # 'l_hip_yaw', 'l_hip_roll', 'l_hip_pitch', 'l_knee', 'l_ank_pitch', 'l_ank_roll',  # 左腿
-         0.0, 0.0, 0.0, 0.0, 0.0, 0.0]  # 'r_hip_yaw', 'r_hip_roll', 'r_hip_pitch', 'r_knee', 'r_ank_pitch', 'r_ank_roll',  # 右腿
+         0.0, 0.0, -0.0,  0.0, -0.0, 0.0,  # 'l_hip_yaw', 'l_hip_roll', 'l_hip_pitch', 'l_knee', 'l_ank_pitch', 'l_ank_roll',  # 左腿
+         0.0, 0.0, 0.4000,  -0.4000, 0.2000, 0.0]  # 'r_hip_yaw', 'r_hip_roll', 'r_hip_pitch', 'r_knee', 'r_ank_pitch', 'r_ank_roll',  # 右腿
         )
 
 target_angles = 0.4 * np.ones(num_actuated_joints)

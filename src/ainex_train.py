@@ -40,7 +40,7 @@ def get_train_cfg(exp_name, max_iterations):
             "load_run": -1,
             "log_interval": 1,
             "max_iterations": max_iterations,
-            "num_steps_per_env": 24,
+            "num_steps_per_env": 1024, # test
             "policy_class_name": "ActorCritic",
             "record_interval": -1,
             "resume": False,
@@ -76,8 +76,8 @@ def get_cfgs():
             "l_hip_yaw": 0.0, "l_hip_roll": 0.0, "l_hip_pitch": 0.0, "l_knee": 0.0, "l_ank_pitch": 0.0, "l_ank_roll": 0.0,
             "r_hip_yaw": 0.0, "r_hip_roll": 0.0, "r_hip_pitch": 0.0, "r_knee": 0.0, "r_ank_pitch": 0.0, "r_ank_roll": 0.0
         },
-        "kp": 100.0,
-        "kd": 10.0,
+        "kp": 300.0,
+        "kd": 20.0,
         "num_actions": 12,
         "clip_actions": 1.0,
         "action_scale": 1.0,
@@ -103,8 +103,8 @@ def get_cfgs():
         },
     }
     reward_cfg = {
-        "cycle_time": 0.56,
-        "target_joint_pos_scale": 0.1,
+        "cycle_time": 1.96,
+        "target_joint_pos_scale": 0.2,
         "max_contact_force": 200.,
         "tracking_sigma": 5.,
         "base_height_target": 0.83,
