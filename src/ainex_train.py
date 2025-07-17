@@ -40,7 +40,7 @@ def get_train_cfg(exp_name, max_iterations):
             "load_run": -1,
             "log_interval": 1,
             "max_iterations": max_iterations,
-            "num_steps_per_env": 1024, # test
+            "num_steps_per_env": 100, # test
             "policy_class_name": "ActorCritic",
             "record_interval": -1,
             "resume": False,
@@ -103,7 +103,7 @@ def get_cfgs():
         },
     }
     reward_cfg = {
-        "cycle_time": 1.96,
+        "cycle_time": 1.5,
         "target_joint_pos_scale": 0.2,
         "max_contact_force": 200.,
         "tracking_sigma": 5.,
