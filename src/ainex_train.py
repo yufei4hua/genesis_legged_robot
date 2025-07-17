@@ -122,7 +122,7 @@ def get_cfgs():
             "feet_distance": 0.2,
             "knee_distance": 0.2,
                         
-            "tracking_lin_vel": 1.5, # ? not used
+            "tracking_lin_vel": 1.5, 
             "tracking_ang_vel": 1.0,
             "vel_mismatch_exp": 0.5,
             "low_speed": 0.2,
