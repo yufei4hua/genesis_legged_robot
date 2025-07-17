@@ -203,4 +203,5 @@ if __name__ == "__main__":
 """
 # training
 python src/ainex_train.py
+python src/ainex_train.py --headless # no viewer
 """
