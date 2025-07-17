@@ -37,7 +37,7 @@ class AinexEnv:
 
         # create scene
         self.scene = gs.Scene(
-            sim_options=gs.options.SimOptions(dt=self.dt, substeps=2),
+            sim_options=gs.options.SimOptions(dt=self.dt, substeps=1),
             viewer_options=gs.options.ViewerOptions(
                 max_FPS=int(0.5 / self.dt),
                 camera_pos=(2.0, 0.0, 2.5),
@@ -84,15 +84,15 @@ class AinexEnv:
          0.0,-1.4, 0.0, 0.0, 0.0,       # 'l_sho_pitch', 'l_sho_roll', 'l_el_pitch', 'l_el_yaw', 'l_gripper',       # 左手
          0.0, 1.4, 0.0, 0.0, 0.0,       # 'r_sho_pitch', 'r_sho_roll', 'r_el_pitch', 'r_el_yaw', 'r_gripper',       # 右手
          0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  # 'l_hip_yaw', 'l_hip_roll', 'l_hip_pitch', 'l_knee', 'l_ank_pitch', 'l_ank_roll',  # 左腿
-         0.0, 0.0, -1.0000, -0.4000, 0.2000, 0.0]  # 'r_hip_yaw', 'r_hip_roll', 'r_hip_pitch', 'r_knee', 'r_ank_pitch', 'r_ank_roll',  # 右腿
+         0.0, 0.0, 0.0, -0.0, 0.0, 0.0]  # 'r_hip_yaw', 'r_hip_roll', 'r_hip_pitch', 'r_knee', 'r_ank_pitch', 'r_ank_roll',  # 右腿
         ])
         self.ref_dof_pos = self.q_home[:, -12:]
         self.all_motor_dofs = [self.robot.get_joint(name).dofs_idx_local[0] for name in self.env_cfg["all_dof_names"]]
         self.robot.set_dofs_kp(kp=np.ones(self.num_actuated_joints) * self.env_cfg["kp"], dofs_idx_local=self.all_motor_dofs)
         self.robot.set_dofs_kv(kv=np.ones(self.num_actuated_joints) * self.env_cfg["kd"], dofs_idx_local=self.all_motor_dofs)
         self.robot.control_dofs_position(
-            # self.q_home,
-            torch.ones_like(self.q_home),
+            self.q_home,
+            # torch.ones_like(self.q_home),
             self.all_motor_dofs,
         )
         # names to indices
@@ -195,6 +195,7 @@ class AinexEnv:
         # self.robot.control_dofs_position(target_dof_pos, self.motor_dofs)
         self.scene.step()
         # print(self.robot.get_dofs_position(self.motor_dofs))
+        # print("Current Base height:", self.base_pos[:, 2])
 
         # update buffers
         self.episode_length_buf += 1
@@ -414,7 +415,7 @@ class AinexEnv:
         self.feet_air_time *= ~self.contact_filt
         return air_time
     
-    def _reward_foot_slip(self):
+    def _reward_foot_slip(self): 
         """
         Calculates the reward for minimizing foot slip. The reward is based on the contact forces 
         and the speed of the feet. A contact threshold is used to determine if the foot is in contact 
@@ -472,7 +473,7 @@ class AinexEnv:
         """
         Tracks linear velocity commands along the xy axes. 
         Calculates a reward based on how closely the robot's linear velocity matches the commanded values.
-        """
+        """ # _resample_commands, lin_vel_x_range and lin_vel_y_range
         lin_vel_error = torch.sum(torch.square(
             self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1) / (torch.norm(self.commands[:, :2], dim=1)+0.05)
         return torch.exp(-lin_vel_error * self.reward_cfg["tracking_sigma"])
@@ -591,7 +592,7 @@ class AinexEnv:
         Calculates the reward for keeping contact forces within a specified range. Penalizes
         high contact forces on the feet.
         """
-        # print(torch.mean(torch.norm(self.contact_forces[:, self.feet_indices, :], dim=-1)))
+        # print("contact force: ", torch.mean(torch.norm(self.links_net_force[:, self.feet_indices, :], dim=-1))) # 899.6826
         return torch.sum((torch.norm(self.links_net_force[:, self.feet_indices, :], dim=-1) - self.reward_cfg["max_contact_force"]).clip(0, 200).square(), dim=1)
     
     def _reward_action_smoothness(self):
