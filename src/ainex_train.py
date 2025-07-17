@@ -58,6 +58,13 @@ def get_train_cfg(exp_name, max_iterations):
 
 def get_cfgs():
     env_cfg = {
+        "all_dof_names": [
+            'head_pan', 'head_tilt',                                                  # 头部
+            'l_sho_pitch', 'l_sho_roll', 'l_el_pitch', 'l_el_yaw', 'l_gripper',       # 左手
+            'r_sho_pitch', 'r_sho_roll', 'r_el_pitch', 'r_el_yaw', 'r_gripper',       # 右手
+            'l_hip_yaw', 'l_hip_roll', 'l_hip_pitch', 'l_knee', 'l_ank_pitch', 'l_ank_roll',  # 左腿
+            'r_hip_yaw', 'r_hip_roll', 'r_hip_pitch', 'r_knee', 'r_ank_pitch', 'r_ank_roll',  # 右腿
+        ],
         "dof_names": [
             "l_hip_yaw", "l_hip_roll", "l_hip_pitch", "l_knee", "l_ank_pitch", "l_ank_roll",
             "r_hip_yaw", "r_hip_roll", "r_hip_pitch", "r_knee", "r_ank_pitch", "r_ank_roll"
@@ -66,20 +73,20 @@ def get_cfgs():
         "knee_names": ["l_knee_link", "r_knee_link"],          # 根据URDF填写膝盖连杆名
         "penalize_contacts_on": ["base"],  
         "default_joint_angles": {
-            "l_hip_yaw": 0.0, "l_hip_roll": 0.0, "l_hip_pitch": 0.0, "l_knee": 0.7, "l_ank_pitch": -0.7, "l_ank_roll": 0.0,
-            "r_hip_yaw": 0.0, "r_hip_roll": 0.0, "r_hip_pitch": 0.0, "r_knee": 0.7, "r_ank_pitch": -0.7, "r_ank_roll": 0.0
+            "l_hip_yaw": 0.0, "l_hip_roll": 0.0, "l_hip_pitch": 0.0, "l_knee": 0.0, "l_ank_pitch": 0.0, "l_ank_roll": 0.0,
+            "r_hip_yaw": 0.0, "r_hip_roll": 0.0, "r_hip_pitch": 0.0, "r_knee": 0.0, "r_ank_pitch": 0.0, "r_ank_roll": 0.0
         },
-        "kp": [40.0]*12,
-        "kd": [1.0]*12,
+        "kp": 100.0,
+        "kd": 10.0,
         "num_actions": 12,
         "clip_actions": 1.0,
-        "action_scale": 0.5,
-        "base_init_pos": [0.0, 0.0, 0.2],
+        "action_scale": 1.0,
+        "base_init_pos": [0.0, 0.0, 0.25],
         "base_init_quat": [1.0, 0.0, 0.0, 0.0],
         "episode_length_s": 10.0,
         "resampling_time_s": 2.0,
-        "termination_if_pitch_greater_than": 0.7,
-        "termination_if_roll_greater_than": 0.7,
+        "termination_if_pitch_greater_than": 3.7,
+        "termination_if_roll_greater_than": 3.7,
     }
     obs_cfg = {
         "num_single_obs": 61,
@@ -155,7 +162,7 @@ def get_cfgs():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="ainex-walking-all")
-    parser.add_argument("-B", "--num_envs", type=int, default=2)
+    parser.add_argument("-B", "--num_envs", type=int, default=1)
     parser.add_argument("--max_iterations", type=int, default=10)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--headless", action="store_true", default=False)

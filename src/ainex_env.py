@@ -1,5 +1,6 @@
 import torch
 import math
+import numpy as np
 import genesis as gs
 from genesis.utils.geom import quat_to_xyz, transform_by_quat, inv_quat, transform_quat_by_quat
 from collections import deque
@@ -21,7 +22,7 @@ class AinexEnv:
         self.num_actions = env_cfg["num_actions"]
         self.num_commands = command_cfg["num_commands"]
 
-        self.simulate_action_latency = True  # there is a 1 step latency on real robot
+        self.simulate_action_latency = False  # there is a 1 step latency on real robot
         self.dt = 0.01  # control frequence on real robot is 100hz
         self.max_episode_length = math.ceil(env_cfg["episode_length_s"] / self.dt)
 
@@ -36,7 +37,7 @@ class AinexEnv:
 
         # create scene
         self.scene = gs.Scene(
-            sim_options=gs.options.SimOptions(dt=self.dt, substeps=10),
+            sim_options=gs.options.SimOptions(dt=self.dt, substeps=2),
             viewer_options=gs.options.ViewerOptions(
                 max_FPS=int(0.5 / self.dt),
                 camera_pos=(2.0, 0.0, 2.5),
@@ -52,10 +53,12 @@ class AinexEnv:
             ),
             show_viewer=show_viewer,
         )
-        
+                
 
         # add plain
-        self.scene.add_entity(gs.morphs.URDF(file="urdf/plane/plane.urdf", fixed=True))
+        plane = self.scene.add_entity(
+            gs.morphs.Plane(),
+        )
 
         # add robot
         self.base_init_pos = torch.tensor(self.env_cfg["base_init_pos"], device=self.device)
@@ -68,20 +71,39 @@ class AinexEnv:
                 quat=self.base_init_quat.cpu().numpy(),
             ),
         )
-        print("All link names:", [link.name for link in self.robot.links])
 
         # build
         self.scene.build(n_envs=num_envs)
 
+        # set all joints target position
+        joints_name = [joint.name for joint in self.robot.joints][1:]
+        self.num_actuated_joints = len(joints_name)
+        print("Ainex All Joints:", len(joints_name), joints_name)
+        self.q_home = torch.tensor([
+        [0.0, 0.0,                      # 'head_pan', 'head_tilt',                                                  # 头部
+         0.0,-1.4, 0.0, 0.0, 0.0,       # 'l_sho_pitch', 'l_sho_roll', 'l_el_pitch', 'l_el_yaw', 'l_gripper',       # 左手
+         0.0, 1.4, 0.0, 0.0, 0.0,       # 'r_sho_pitch', 'r_sho_roll', 'r_el_pitch', 'r_el_yaw', 'r_gripper',       # 右手
+         0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  # 'l_hip_yaw', 'l_hip_roll', 'l_hip_pitch', 'l_knee', 'l_ank_pitch', 'l_ank_roll',  # 左腿
+         0.0, 0.0, 0.0, 0.0, 0.0, 0.0]  # 'r_hip_yaw', 'r_hip_roll', 'r_hip_pitch', 'r_knee', 'r_ank_pitch', 'r_ank_roll',  # 右腿
+        ])
+        self.all_motor_dofs = [self.robot.get_joint(name).dofs_idx_local[0] for name in self.env_cfg["all_dof_names"]]
+        self.robot.set_dofs_kp(kp=np.ones(self.num_actuated_joints) * self.env_cfg["kp"], dofs_idx_local=self.all_motor_dofs)
+        self.robot.set_dofs_kv(kv=np.ones(self.num_actuated_joints) * self.env_cfg["kd"], dofs_idx_local=self.all_motor_dofs)
+        self.robot.control_dofs_position(
+            self.q_home,
+            self.all_motor_dofs,
+        )
         # names to indices
         #TODO 修正关于dof的索引
         #修正关于link的索引问题
         # #motor_dofs[6, 8, 10, 12, 14, 16, 7, 9, 11, 13, 15, 17]
+
+        print("Ainex Leg Joints:", self.env_cfg["dof_names"])
         self.motor_dofs = [self.robot.get_joint(name).dof_idx_local for name in self.env_cfg["dof_names"]]
 
         # PD control parameters
-        self.robot.set_dofs_kp(self.env_cfg["kp"], self.motor_dofs)
-        self.robot.set_dofs_kv(self.env_cfg["kd"], self.motor_dofs)
+        self.robot.set_dofs_kp(np.ones(self.num_actions) * self.env_cfg["kp"], self.motor_dofs)
+        self.robot.set_dofs_kv(np.ones(self.num_actions) * self.env_cfg["kd"], self.motor_dofs)
 
         # prepare reward functions and multiply reward scales by dt
         self.reward_functions, self.episode_sums = dict(), dict()
@@ -159,12 +181,16 @@ class AinexEnv:
         self.commands[envs_idx, 1] = gs_rand_float(*self.command_cfg["lin_vel_y_range"], (len(envs_idx),), self.device)
         self.commands[envs_idx, 2] = gs_rand_float(*self.command_cfg["ang_vel_range"], (len(envs_idx),), self.device)
 
+    # region STEP
     def step(self, actions):
         self.actions = torch.clip(actions, -self.env_cfg["clip_actions"], self.env_cfg["clip_actions"])
+        # self.actions = torch.zeros_like(actions) # TODO test action
+
         exec_actions = self.last_actions if self.simulate_action_latency else self.actions
         target_dof_pos = exec_actions * self.env_cfg["action_scale"] + self.default_dof_pos
         self.robot.control_dofs_position(target_dof_pos, self.motor_dofs)
         self.scene.step()
+        # print(self.robot.get_dofs_position(self.all_motor_dofs))
 
         # update buffers
         self.episode_length_buf += 1
