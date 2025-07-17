@@ -21,7 +21,7 @@ def get_train_cfg(exp_name, max_iterations):
             "learning_rate": 0.001,
             "max_grad_norm": 1.0,
             "num_learning_epochs": 5,
-            "num_mini_batches": 4,
+            "num_mini_batches": 512,
             "schedule": "adaptive",
             "use_clipped_value_loss": True,
             "value_loss_coef": 1.0,
@@ -40,14 +40,14 @@ def get_train_cfg(exp_name, max_iterations):
             "load_run": -1,
             "log_interval": 1,
             "max_iterations": max_iterations,
-            "num_steps_per_env": 100, # test
+            "num_steps_per_env": 24,
             "policy_class_name": "ActorCritic",
             "record_interval": -1,
             "resume": False,
             "resume_path": None,
             "run_name": "",
             "runner_class_name": "runner_class_name",
-            "save_interval": 5,
+            "save_interval": 10,
         },
         "runner_class_name": "OnPolicyRunner",
         "seed": 1,
@@ -85,8 +85,8 @@ def get_cfgs():
         "base_init_quat": [1.0, 0.0, 0.0, 0.0],
         "episode_length_s": 10.0,
         "resampling_time_s": 2.0,
-        "termination_if_pitch_greater_than": 3.7,
-        "termination_if_roll_greater_than": 3.7,
+        "termination_if_pitch_greater_than": 0.7,
+        "termination_if_roll_greater_than": 0.7,
     }
     obs_cfg = {
         "num_single_obs": 61,
@@ -145,9 +145,9 @@ def get_cfgs():
     }
     command_cfg = {
         "num_commands": 3,
-        "lin_vel_x_range": [-0.23, 0.23], # speed 23cm/s
+        "lin_vel_x_range": [-0.18, 0.18], # product max speed 21cm/s
         "lin_vel_y_range": [-0.05, 0.05],
-        "ang_vel_range": [-1.0, 1.0], 
+        "ang_vel_range": [-0.0, 0.0], 
     }
     # command_cfg = {
     #     "num_commands": 3,
@@ -162,8 +162,8 @@ def get_cfgs():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="ainex-walking-all")
-    parser.add_argument("-B", "--num_envs", type=int, default=1)
-    parser.add_argument("--max_iterations", type=int, default=10)
+    parser.add_argument("-B", "--num_envs", type=int, default=4096)
+    parser.add_argument("--max_iterations", type=int, default=200)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--headless", action="store_true", default=False)
     args = parser.parse_args()
