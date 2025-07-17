@@ -4,15 +4,15 @@ import numpy as np
 gs.init(backend=gs.gpu)
 
 scene = gs.Scene(
-    viewer_options=gs.options.ViewerOptions(
-        camera_pos=(0, -3.5, 2.5),
-        camera_lookat=(0.0, 0.0, 0.5),
-        camera_fov=30,
-        max_FPS=60,
-    ),
-    sim_options=gs.options.SimOptions(
-        dt=0.01,
-    ),
+    # viewer_options=gs.options.ViewerOptions(
+    #     camera_pos=(0, -3.5, 2.5),
+    #     camera_lookat=(0.0, 0.0, 0.5),
+    #     camera_fov=30,
+    #     max_FPS=60,
+    # ),
+    # sim_options=gs.options.SimOptions(
+    #     dt=0.01,
+    # ),
     show_viewer=True,
 )
 
@@ -59,3 +59,11 @@ for i in range(1000):
     )
 
     scene.step()
+
+
+# TODO:
+# walking controller:
+#   obs: joint positions, base pos, vel, acc
+#   act: joint position commands
+# ainex env:
+# 
