@@ -37,7 +37,7 @@ class AinexEnv:
 
         # create scene
         self.scene = gs.Scene(
-            sim_options=gs.options.SimOptions(dt=self.dt, substeps=1),
+            sim_options=gs.options.SimOptions(dt=self.dt),
             viewer_options=gs.options.ViewerOptions(
                 max_FPS=int(0.5 / self.dt),
                 camera_pos=(2.0, 0.0, 2.5),
@@ -75,6 +75,7 @@ class AinexEnv:
         # build
         self.scene.build(n_envs=num_envs)
 
+        # region INIT
         # set all joints target position
         joints_name = [joint.name for joint in self.robot.joints][1:]
         self.num_actuated_joints = len(joints_name)
@@ -83,8 +84,8 @@ class AinexEnv:
         [0.0, 0.0,                      # 'head_pan', 'head_tilt',                                                  # 头部
          0.0,-1.4, 0.0, 0.0, 0.0,       # 'l_sho_pitch', 'l_sho_roll', 'l_el_pitch', 'l_el_yaw', 'l_gripper',       # 左手
          0.0, 1.4, 0.0, 0.0, 0.0,       # 'r_sho_pitch', 'r_sho_roll', 'r_el_pitch', 'r_el_yaw', 'r_gripper',       # 右手
-         0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  # 'l_hip_yaw', 'l_hip_roll', 'l_hip_pitch', 'l_knee', 'l_ank_pitch', 'l_ank_roll',  # 左腿
-         0.0, 0.0, 0.0, -0.0, 0.0, 0.0]  # 'r_hip_yaw', 'r_hip_roll', 'r_hip_pitch', 'r_knee', 'r_ank_pitch', 'r_ank_roll',  # 右腿
+         0.0, 0.0, 0.0, 0.0, 0.1, 0.0,  # 'l_hip_yaw', 'l_hip_roll', 'l_hip_pitch', 'l_knee', 'l_ank_pitch', 'l_ank_roll',  # 左腿
+         0.0, 0.0, 0.0, 0.0, -0.1, 0.0]  # 'r_hip_yaw', 'r_hip_roll', 'r_hip_pitch', 'r_knee', 'r_ank_pitch', 'r_ank_roll',  # 右腿
         ])
         self.ref_dof_pos = self.q_home[:, -12:]
         self.all_motor_dofs = [self.robot.get_joint(name).dofs_idx_local[0] for name in self.env_cfg["all_dof_names"]]
@@ -92,13 +93,9 @@ class AinexEnv:
         self.robot.set_dofs_kv(kv=np.ones(self.num_actuated_joints) * self.env_cfg["kd"], dofs_idx_local=self.all_motor_dofs)
         self.robot.control_dofs_position(
             self.q_home,
-            # torch.ones_like(self.q_home),
             self.all_motor_dofs,
         )
         # names to indices
-        #TODO 修正关于dof的索引
-        #修正关于link的索引问题
-        # #motor_dofs[6, 8, 10, 12, 14, 16, 7, 9, 11, 13, 15, 17]
 
         print("Ainex Leg Joints:", self.env_cfg["dof_names"])
         self.motor_dofs = [self.robot.get_joint(name).dofs_idx_local[0] for name in self.env_cfg["dof_names"]]
@@ -187,12 +184,10 @@ class AinexEnv:
     # region STEP
     def step(self, actions):
         self.actions = torch.clip(actions, -self.env_cfg["clip_actions"], self.env_cfg["clip_actions"])
-        # self.actions = torch.zeros_like(actions) # TODO test action
         self.actions = self.ref_dof_pos
-        self.actions = torch.tensor([[0.0, 0.0, -0.0,  0.0, -0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]])
         exec_actions = self.last_actions if self.simulate_action_latency else self.actions
         target_dof_pos = exec_actions * self.env_cfg["action_scale"] + self.default_dof_pos
-        # self.robot.control_dofs_position(target_dof_pos, self.motor_dofs)
+        self.robot.control_dofs_position(target_dof_pos, self.motor_dofs)
         self.scene.step()
         # print(self.robot.get_dofs_position(self.motor_dofs))
         # print("Current Base height:", self.base_pos[:, 2])
@@ -304,20 +299,23 @@ class AinexEnv:
         sin_pos_l = sin_pos.clone()
         sin_pos_r = sin_pos.clone()
         scale_1 = self.reward_cfg["target_joint_pos_scale"]
-        scale_2 = 2*scale_1
+        scale_2 = 3*scale_1
+        scale_0_5 = 0.5*scale_1
         # left foot
         sin_pos_l[sin_pos_l > 0] = 0
         self.ref_dof_pos[:, 2] = sin_pos_l * scale_2    # l_hip_pitch
         self.ref_dof_pos[:, 3] = -sin_pos_l * scale_2   # l_knee
-        self.ref_dof_pos[:, 4] = sin_pos_l * scale_1    # l_ank_pitch
+        self.ref_dof_pos[:, 4] = sin_pos_l * scale_0_5    # l_ank_pitch
+        self.ref_dof_pos[:, 10] = sin_pos_l * scale_1    # r_ank_pitch
         # right foot 
         sin_pos_r[sin_pos_r < 0] = 0
         self.ref_dof_pos[:, 8] = sin_pos_r * scale_2    # r_hip_pitch
         self.ref_dof_pos[:, 9] = -sin_pos_r * scale_2   # r_knee
-        self.ref_dof_pos[:, 10]= sin_pos_r * scale_1    # r_ank_pitch
+        self.ref_dof_pos[:, 10]= sin_pos_r * scale_0_5    # r_ank_pitch
+        self.ref_dof_pos[:, 4] = sin_pos_r * scale_1    # l_ank_pitch
         # Double support phase
         self.ref_dof_pos[torch.abs(sin_pos) < 0.1] = 0
-        print(self.ref_dof_pos[0, [2,3,4,8,9,10]])
+        # print(self.ref_dof_pos[0, [2,3,4,8,9,10]])
         
 
     def get_observations(self):
