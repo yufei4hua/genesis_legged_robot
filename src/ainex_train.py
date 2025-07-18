@@ -104,7 +104,7 @@ def get_cfgs():
     }
     reward_cfg = {
         "cycle_time": 1.5,
-        "target_joint_pos_scale": 0.2,
+        "target_joint_pos_scale": 0.25,
         "max_contact_force": 1000., # 899.6826 by standing still
         "tracking_sigma": 5., # sensitivity for tracking rewards, lin. and ang. vel.
         "base_height_target": 0.2344,

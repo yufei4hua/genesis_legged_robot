@@ -12,7 +12,7 @@ import genesis as gs
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="ainex-walking-all")
-    parser.add_argument("--ckpt", type=int, default=2000)
+    parser.add_argument("--ckpt", type=int, default=200)
     args = parser.parse_args()
 
     gs.init()
