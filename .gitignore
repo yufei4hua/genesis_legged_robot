@@ -1,4 +1,4 @@
-logs/
+#logs/
 tmp/
 MUJOCO_LOG.TXT
 imgui.ini
