@@ -85,8 +85,8 @@ class AinexEnv:
         [0.0, 0.0,                      # 'head_pan', 'head_tilt',                                                  # 头部
          0.0,-1.4, 0.0, 0.0, 0.0,       # 'l_sho_pitch', 'l_sho_roll', 'l_el_pitch', 'l_el_yaw', 'l_gripper',       # 左手
          0.0, 1.4, 0.0, 0.0, 0.0,       # 'r_sho_pitch', 'r_sho_roll', 'r_el_pitch', 'r_el_yaw', 'r_gripper',       # 右手
-         0.0, 0.0, 0.0, 0.0, 0.1, 0.0,  # 'l_hip_yaw', 'l_hip_roll', 'l_hip_pitch', 'l_knee', 'l_ank_pitch', 'l_ank_roll',  # 左腿
-         0.0, 0.0, 0.0, 0.0, -0.1, 0.0] # 'r_hip_yaw', 'r_hip_roll', 'r_hip_pitch', 'r_knee', 'r_ank_pitch', 'r_ank_roll',  # 右腿
+         0.0, 0.0, 0.0, 0.0, 0.0, 0.0,  # 'l_hip_yaw', 'l_hip_roll', 'l_hip_pitch', 'l_knee', 'l_ank_pitch', 'l_ank_roll',  # 左腿
+         0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # 'r_hip_yaw', 'r_hip_roll', 'r_hip_pitch', 'r_knee', 'r_ank_pitch', 'r_ank_roll',  # 右腿
         ], device=self.device, dtype=gs.tc_float).repeat(self.num_envs, 1)  # <--- add repeat
         self.ref_dof_pos = self.q_home[:, -12:]
         self.all_motor_dofs = [self.robot.get_joint(name).dofs_idx_local[0] for name in self.env_cfg["all_dof_names"]]
@@ -109,7 +109,7 @@ class AinexEnv:
         # prepare reward functions and multiply reward scales by dt
         self.reward_functions, self.episode_sums = dict(), dict()
         for name in self.reward_scales.keys():
-            self.reward_scales[name] *= self.dt
+            # self.reward_scales[name] *= self.dt
             self.reward_functions[name] = getattr(self, "_reward_" + name)
             self.episode_sums[name] = torch.zeros((self.num_envs,), device=self.device, dtype=gs.tc_float)
 
@@ -185,7 +185,7 @@ class AinexEnv:
     # region STEP
     def step(self, actions):
         self.actions = torch.clip(actions, -self.env_cfg["clip_actions"], self.env_cfg["clip_actions"])
-        # self.actions = self.ref_dof_pos
+        # self.actions = self.ref_dof_pos # NOTE: test heuristic gait
         exec_actions = self.last_actions if self.simulate_action_latency else self.actions
         target_dof_pos = exec_actions * self.env_cfg["action_scale"] + self.default_dof_pos
         self.robot.control_dofs_position(target_dof_pos, self.motor_dofs)
@@ -234,12 +234,15 @@ class AinexEnv:
         # compute reward
         self._get_phase()
         self.rew_buf[:] = 0.0
+        # self.reward_debug = dict()
+        # print("\n\n\nREWARDS:")
         for name, reward_func in self.reward_functions.items():
             rew = reward_func() * self.reward_scales[name]
+            # print(f"{name}: {rew[0]:.4f}") # reward debug
             self.rew_buf += rew
             self.episode_sums[name] += rew
+        # print("\n\n\n")
         
-        #TODO 探究不同类型obs输入的区别
         self.obs_buf = torch.cat(
             [   torch.sin(2 * torch.pi * self.phase).unsqueeze(-1), #1
                 torch.cos(2 * torch.pi * self.phase).unsqueeze(-1), #1
@@ -300,20 +303,20 @@ class AinexEnv:
         sin_pos_l = sin_pos.clone()
         sin_pos_r = sin_pos.clone()
         scale_1 = self.reward_cfg["target_joint_pos_scale"]
-        scale_2 = 3*scale_1
+        scale_2 = 1.5*scale_1
         scale_0_5 = 0.5*scale_1
         # left foot
         sin_pos_l[sin_pos_l > 0] = 0
-        self.ref_dof_pos[:, 2] = sin_pos_l * scale_2    # l_hip_pitch
-        self.ref_dof_pos[:, 3] = -sin_pos_l * scale_2   # l_knee
-        self.ref_dof_pos[:, 4] = sin_pos_l * scale_0_5    # l_ank_pitch
-        self.ref_dof_pos[:, 10] = sin_pos_l * scale_1    # r_ank_pitch
+        self.ref_dof_pos[:, 2] = sin_pos_l * scale_1    # l_hip_pitch
+        self.ref_dof_pos[:, 3] = -sin_pos_l * scale_1   # l_knee
+        # self.ref_dof_pos[:, 4] = sin_pos_l * scale_0_5    # l_ank_pitch
+        # self.ref_dof_pos[:, 10] = sin_pos_l * scale_1    # r_ank_pitch
         # right foot 
         sin_pos_r[sin_pos_r < 0] = 0
-        self.ref_dof_pos[:, 8] = sin_pos_r * scale_2    # r_hip_pitch
-        self.ref_dof_pos[:, 9] = -sin_pos_r * scale_2   # r_knee
-        self.ref_dof_pos[:, 10]= sin_pos_r * scale_0_5    # r_ank_pitch
-        self.ref_dof_pos[:, 4] = sin_pos_r * scale_1    # l_ank_pitch
+        self.ref_dof_pos[:, 8] = sin_pos_r * scale_1    # r_hip_pitch
+        self.ref_dof_pos[:, 9] = -sin_pos_r * scale_1   # r_knee
+        # self.ref_dof_pos[:, 10]= sin_pos_r * scale_0_5    # r_ank_pitch
+        # self.ref_dof_pos[:, 4] = sin_pos_r * scale_1    # l_ank_pitch
         # Double support phase
         self.ref_dof_pos[torch.abs(sin_pos) < 0.1] = 0
         # print(self.ref_dof_pos[0, [2,3,4,8,9,10]])
@@ -373,6 +376,7 @@ class AinexEnv:
         self.reset_idx(torch.arange(self.num_envs, device=self.device))
         return self.obs_buf_all, None
 
+    # region REWARD
     # ------------ reward functions----------------
     def _reward_joint_pos(self):
         """
@@ -437,7 +441,7 @@ class AinexEnv:
         # Get the z-position of the feet and compute the change in z-position
         self.feet_height = self.links_pos[:, self.feet_indices, 2]
         # feet height should be closed to target feet height at the peak
-        rew_pos = torch.abs(self.feet_height - self.reward_cfg["feet_height_target"]) < 0.01
+        rew_pos = torch.abs(self.feet_height - self.reward_cfg["feet_height_target"]) < 0.015
         rew_pos = torch.sum(rew_pos * (1-self.stance_mask), dim=1)
         self.feet_height *= ~contact
         return rew_pos
