@@ -47,7 +47,7 @@ def get_train_cfg(exp_name, max_iterations):
             "resume_path": None,
             "run_name": "",
             "runner_class_name": "runner_class_name",
-            "save_interval": 10,
+            "save_interval": 20,
         },
         "runner_class_name": "OnPolicyRunner",
         "seed": 1,
