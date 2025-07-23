@@ -51,5 +51,8 @@ if __name__ == "__main__":
 
 """
 # evaluation
-src/ainex_eval.py -e ainex-walking-all --ckpt 2000
+python src/ainex_eval.py -e ainex-walking-all --ckpt 200
+
+# tensorboard
+tensorboard --logdir logs/ainex-walking-all
 """
