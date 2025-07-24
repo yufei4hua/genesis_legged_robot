@@ -114,7 +114,7 @@ def get_cfgs():
         "min_distance": 0.02,  # between feet and knees
         "max_distance": 0.3, # 0.45*0.415 = 0.187
         "reward_scales": {
-            "joint_pos": 0.25,
+            "joint_pos": 0, #0.25,
             "feet_contact_number": 0.03, #1.0,
             
             "feet_air_time": 1.0,
