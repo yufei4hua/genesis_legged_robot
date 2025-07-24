@@ -9,7 +9,7 @@ def gs_rand_float(lower, upper, shape, device):
     return (upper - lower) * torch.rand(size=shape, device=device) + lower
 
 class AinexEnv:
-    def __init__(self, num_envs, env_cfg, obs_cfg, reward_cfg, command_cfg, show_viewer=False, device="cuda"):
+    def __init__(self, num_envs, env_cfg, obs_cfg, reward_cfg, command_cfg, show_viewer=True, device="cuda"):
         self.device = torch.device(device)
         self.num_envs = num_envs
         self.num_single_obs = obs_cfg["num_single_obs"]
@@ -23,7 +23,7 @@ class AinexEnv:
         self.num_commands = command_cfg["num_commands"]
 
         self.simulate_action_latency = False  # there is a 1 step latency on real robot
-        self.dt = 0.01  # control frequence on real robot is 100hz
+        self.dt = env_cfg["dt"]  # control frequence on real robot is 100hz
         self.max_episode_length = math.ceil(env_cfg["episode_length_s"] / self.dt)
 
         self.env_cfg = env_cfg

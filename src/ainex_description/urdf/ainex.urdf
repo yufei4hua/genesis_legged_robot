@@ -439,6 +439,21 @@
       <mass value="0.0675"/>
       <inertia ixx="0.00004217" ixy="-0.00000108" ixz="-0.00000226" iyy="0.00009246" iyz="0.00000304" izz="0.00012567"/>
     </inertial>
+
+    <!-- <visual>
+      <origin xyz="0.03 -0.015 -0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.12 0.08 0.004"/>
+      </geometry>
+      <material name="green"/>
+    </visual> -->
+
+    <collision>
+      <origin xyz="0.03 -0.015 -0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.12 0.08 0.004"/>
+      </geometry>
+    </collision>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -446,12 +461,12 @@
       </geometry>
       <material name="white"/>
     </visual>
-    <collision>
+    <!-- <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://ainex_description/meshes/r_ank_roll_link.STL"/>
       </geometry>
-    </collision>
+    </collision> -->
   </link>
   <joint name="r_ank_roll" type="revolute">
     <origin rpy="0 0 0" xyz="-0.0190366011761311 0.0199999999998644 0"/>
@@ -607,6 +622,20 @@
       <mass value="0.0675"/>
       <inertia ixx="0.00004217" ixy="0.00000108" ixz="-0.00000226" iyy="0.00009246" iyz="-0.00000304" izz="0.00012567"/>
     </inertial>
+    <!-- <visual>
+      <origin xyz="0.03 0.015 -0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.12 0.08 0.004"/>
+      </geometry>
+      <material name="green"/>
+    </visual> -->
+
+    <collision>
+      <origin xyz="0.03 0.015 -0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.12 0.08 0.004"/>
+      </geometry>
+    </collision>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -614,12 +643,12 @@
       </geometry>
       <material name="white"/>
     </visual>
-    <collision>
+    <!-- <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://ainex_description/meshes/l_ank_roll_link.STL"/>
       </geometry>
-    </collision>
+    </collision> -->
   </link>
   <joint name="l_ank_roll" type="revolute">
     <origin rpy="0 0 0" xyz="-0.019037 -0.02 0"/>

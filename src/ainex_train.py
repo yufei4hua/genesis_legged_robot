@@ -40,14 +40,14 @@ def get_train_cfg(exp_name, max_iterations):
             "load_run": -1,
             "log_interval": 1,
             "max_iterations": max_iterations,
-            "num_steps_per_env": 50, #24,
+            "num_steps_per_env": 48, #24,
             "policy_class_name": "ActorCritic",
             "record_interval": -1,
             "resume": False,
             "resume_path": None,
             "run_name": "",
             "runner_class_name": "runner_class_name",
-            "save_interval": 20,
+            "save_interval": 50,
         },
         "runner_class_name": "OnPolicyRunner",
         "seed": 1,
@@ -87,6 +87,7 @@ def get_cfgs():
         "resampling_time_s": 2.0,
         "termination_if_pitch_greater_than": 0.7,
         "termination_if_roll_greater_than": 0.7,
+        "dt": 0.01,
     }
     obs_cfg = {
         "num_single_obs": 61,
@@ -104,7 +105,7 @@ def get_cfgs():
     }
     reward_cfg = {
         "cycle_time": 1.0,
-        "target_joint_pos_scale": 0.4,
+        "target_joint_pos_scale": 0.4, # imitation part
         "max_contact_force": 1000., # 899.6826 by standing still
         "tracking_sigma": 5., # sensitivity for tracking rewards, lin. and ang. vel.
         "base_height_target": 0.2344,
@@ -113,26 +114,26 @@ def get_cfgs():
         "min_distance": 0.02,  # between feet and knees
         "max_distance": 0.3, # 0.45*0.415 = 0.187
         "reward_scales": {
-            "joint_pos": 1.0,
-            "feet_contact_number": 0.3, #1.0,
+            "joint_pos": 0.25,
+            "feet_contact_number": 0.03, #1.0,
             
             "feet_air_time": 1.0,
             "foot_slip": -0.05,
-            "feet_clearance": 0.15, #1.0,
-            "feet_distance": 0.05, #0.2,
+            "feet_clearance": 0.01, #1.0,
+            "feet_distance": 0.01, #0.2,
             "knee_distance": 0.05, #0.2,
                         
-            "tracking_lin_vel": 0.5, #1.5, 
+            "tracking_lin_vel": 0.3, #1.5, 
             "tracking_ang_vel": 0, #1.0,
             "vel_mismatch_exp": 0.2, #0.5,
             "low_speed": 0.2,
             "track_vel_hard": 0, #0.5,
             
-            "default_joint_pos": 0.5,
+            "default_joint_pos": 0.01,
             "orientation": 0.5, #1.0,
-            "base_height": 0.5, #0.2,
+            "base_height": 0.1, #0.2,
             
-            "base_acc": 0.1, #0.2,
+            "base_acc": 0.01, #0.2,
             "feet_contact_forces": 0,#-2e-5,
             "action_smoothness": 0,#-2e-3,
             "torques": 0,#-2e-3,
@@ -145,7 +146,7 @@ def get_cfgs():
     }
     command_cfg = {
         "num_commands": 3,
-        "lin_vel_x_range": [-0.10, 0.10], # product max speed 21cm/s
+        "lin_vel_x_range": [0.05, 0.5], # product max speed 21cm/s
         "lin_vel_y_range": [-0.01, 0.01],
         "ang_vel_range": [-0.0, 0.0], 
     }
@@ -163,7 +164,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="ainex-walking-all")
     parser.add_argument("-B", "--num_envs", type=int, default=4096)
-    parser.add_argument("--max_iterations", type=int, default=200)
+    parser.add_argument("--max_iterations", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--headless", action="store_true", default=False)
     args = parser.parse_args()
@@ -204,8 +205,8 @@ if __name__ == "__main__":
 # training
 python src/ainex_train.py
 python src/ainex_train.py --headless # no viewer
-python src/ainex_train.py --headless --num_envs 16384 
+python src/ainex_train.py --headless --num_envs 4096
 
 # testing
-python src/ainex_train.py --num_envs 2 --max_iterations 10
+python src/ainex_train.py -e test --num_envs 2 --max_iterations 10
 """

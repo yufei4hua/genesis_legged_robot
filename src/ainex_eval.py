@@ -55,4 +55,8 @@ python src/ainex_eval.py -e ainex-walking-all --ckpt 200
 
 # tensorboard
 tensorboard --logdir logs/ainex-walking-all
+
+# test
+python src/ainex_eval.py -e test --ckpt 10
+
 """
