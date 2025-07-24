@@ -1,3 +1,15 @@
+# Train
+## without imitation
+```bash
+git checkout 5441b0b7
+python src/ainex_train.py -e no_imitation 
+```
+## with imitation
+```bash
+git checkout 459780bd
+python src/ainex_train.py -e with_imitation 
+```
+
 ### imitation 
 with / without
 
