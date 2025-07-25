@@ -224,6 +224,7 @@ class AinexEnv:
         self.reset_buf = self.episode_length_buf > self.max_episode_length
         self.reset_buf |= torch.abs(self.base_euler[:, 1]) > self.env_cfg["termination_if_pitch_greater_than"]
         self.reset_buf |= torch.abs(self.base_euler[:, 0]) > self.env_cfg["termination_if_roll_greater_than"]
+        self.reset_buf |= torch.abs(self.base_pos[:, 2]) < self.env_cfg["termination_if_height_lower_than"]  # Terminate if base height too low
 
         time_out_idx = (self.episode_length_buf > self.max_episode_length).nonzero(as_tuple=False).flatten()
         self.extras["time_outs"] = torch.zeros_like(self.reset_buf, device=self.device, dtype=gs.tc_float)
@@ -578,7 +579,7 @@ class AinexEnv:
         """
         measured_heights = torch.sum(
             self.links_pos[:, self.feet_indices, 2] * self.stance_mask, dim=1) / torch.sum(self.stance_mask, dim=1)
-        base_height = self.base_pos[:, 2] - (measured_heights - 0.05)
+        base_height = self.base_pos[:, 2] #- (measured_heights - 0.05)
         return torch.exp(-torch.abs(base_height - self.reward_cfg["base_height_target"]) * 100)
     
     def _reward_base_acc(self):

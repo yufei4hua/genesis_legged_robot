@@ -87,6 +87,7 @@ def get_cfgs():
         "resampling_time_s": 2.0,
         "termination_if_pitch_greater_than": 0.7,
         "termination_if_roll_greater_than": 0.7,
+        "termination_if_height_lower_than": 0.15,
         "dt": 0.01,
     }
     obs_cfg = {
@@ -107,8 +108,8 @@ def get_cfgs():
         "cycle_time": 1.0,
         "target_joint_pos_scale": 0.4, # imitation part
         "max_contact_force": 1000., # 899.6826 by standing still
-        "tracking_sigma": 5., # sensitivity for tracking rewards, lin. and ang. vel.
-        "base_height_target": 0.2344,
+        "tracking_sigma": 300., #5., # sensitivity for tracking rewards, lin. and ang. vel.
+        "base_height_target": 0.2044, #0.2344,
         "feet_height_target": 0.04, # 0.01~0.03, robot 0~209~415mm
         "soft_torque_limit": 0.9, # 通常0.9，力矩超过最大允许力矩的 90%，惩罚超过软限制的部分
         "min_distance": 0.02,  # between feet and knees
@@ -125,13 +126,13 @@ def get_cfgs():
                         
             "tracking_lin_vel": 0.3, #1.5, 
             "tracking_ang_vel": 0, #1.0,
-            "vel_mismatch_exp": 0.2, #0.5,
+            "vel_mismatch_exp": 0.02, #0.5,
             "low_speed": 0.2,
             "track_vel_hard": 0, #0.5,
             
             "default_joint_pos": 0.01,
-            "orientation": 0.5, #1.0,
-            "base_height": 0.1, #0.2,
+            "orientation": 0.01, #1.0,
+            "base_height": 0.15, #0.2,
             
             "base_acc": 0.01, #0.2,
             "feet_contact_forces": 0,#-2e-5,
@@ -146,7 +147,7 @@ def get_cfgs():
     }
     command_cfg = {
         "num_commands": 3,
-        "lin_vel_x_range": [0.05, 0.5], # product max speed 21cm/s
+        "lin_vel_x_range": [-0.05, 0.5], # product max speed 21cm/s
         "lin_vel_y_range": [-0.01, 0.01],
         "ang_vel_range": [-0.0, 0.0], 
     }
@@ -164,7 +165,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="ainex-walking-all")
     parser.add_argument("-B", "--num_envs", type=int, default=4096)
-    parser.add_argument("--max_iterations", type=int, default=1000)
+    parser.add_argument("--max_iterations", type=int, default=500)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--headless", action="store_true", default=False)
     args = parser.parse_args()
@@ -208,5 +209,5 @@ python src/ainex_train.py --headless # no viewer
 python src/ainex_train.py --headless --num_envs 4096
 
 # testing
-python src/ainex_train.py -e test --num_envs 2 --max_iterations 10
+python src/ainex_train.py -e test --num_envs 2 --max_iterations 1
 """
