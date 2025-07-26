@@ -301,8 +301,8 @@ class AinexEnv:
         self.stance_mask[torch.abs(sin_pos) < 0.1] = 1
         
         self.ref_dof_pos = torch.zeros_like(self.dof_pos)
-        sin_pos_l = sin_pos.clone()
-        sin_pos_r = sin_pos.clone()
+        sin_pos_l = -sin_pos.clone()
+        sin_pos_r = -sin_pos.clone()
         scale_1 = self.reward_cfg["target_joint_pos_scale"]
         scale_2 = 1.5*scale_1
         scale_0_5 = 0.5*scale_1

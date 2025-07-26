@@ -40,7 +40,7 @@ def get_train_cfg(exp_name, max_iterations):
             "load_run": -1,
             "log_interval": 1,
             "max_iterations": max_iterations,
-            "num_steps_per_env": 48, #24,
+            "num_steps_per_env": 192, #48, #24,
             "policy_class_name": "ActorCritic",
             "record_interval": -1,
             "resume": False,
