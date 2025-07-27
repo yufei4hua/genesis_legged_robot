@@ -127,7 +127,7 @@ def get_cfgs():
             "tracking_lin_vel": 0.3, #1.5, 
             "tracking_ang_vel": 0.2, #1.0,
             "vel_mismatch_exp": 0.02, #0.5,
-            "low_speed": 0.2,
+            "low_speed": 0.02,
             "track_vel_hard": 0, #0.5,
             
             "default_joint_pos": 0.01,
@@ -207,7 +207,8 @@ if __name__ == "__main__":
 python src/ainex_train.py
 python src/ainex_train.py --headless # no viewer
 python src/ainex_train.py --headless --num_envs 4096
-python src/ainex_train.py -e no2000 --headless --num_envs 2048 --max_iterations 2000
+python src/ainex_train.py -e no2000 --headless --num_envs 1024 --max_iterations 2000
+python src/ainex_train.py -e lowspeed002 --headless --num_envs 1024 --max_iterations 2000
 
 # testing
 python src/ainex_train.py -e test --num_envs 2 --max_iterations 1
