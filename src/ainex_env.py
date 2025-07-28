@@ -301,20 +301,20 @@ class AinexEnv:
         self.stance_mask[torch.abs(sin_pos) < 0.1] = 1
         
         self.ref_dof_pos = torch.zeros_like(self.dof_pos)
-        sin_pos_l = -sin_pos.clone()
-        sin_pos_r = -sin_pos.clone()
+        sin_pos_l = sin_pos.clone()
+        sin_pos_r = sin_pos.clone()
         scale_1 = self.reward_cfg["target_joint_pos_scale"]
         scale_2 = 1.5*scale_1
         scale_0_5 = 0.5*scale_1
         # left foot
         sin_pos_l[sin_pos_l > 0] = 0
-        self.ref_dof_pos[:, 2] = sin_pos_l * scale_1    # l_hip_pitch
+        self.ref_dof_pos[:, 2] = sin_pos_l * scale_2    # l_hip_pitch
         self.ref_dof_pos[:, 3] = -sin_pos_l * scale_1   # l_knee
         # self.ref_dof_pos[:, 4] = sin_pos_l * scale_0_5    # l_ank_pitch
         # self.ref_dof_pos[:, 10] = sin_pos_l * scale_1    # r_ank_pitch
         # right foot 
         sin_pos_r[sin_pos_r < 0] = 0
-        self.ref_dof_pos[:, 8] = sin_pos_r * scale_1    # r_hip_pitch
+        self.ref_dof_pos[:, 8] = sin_pos_r * scale_2    # r_hip_pitch
         self.ref_dof_pos[:, 9] = -sin_pos_r * scale_1   # r_knee
         # self.ref_dof_pos[:, 10]= sin_pos_r * scale_0_5    # r_ank_pitch
         # self.ref_dof_pos[:, 4] = sin_pos_r * scale_1    # l_ank_pitch
