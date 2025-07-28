@@ -40,7 +40,7 @@ def get_train_cfg(exp_name, max_iterations):
             "load_run": -1,
             "log_interval": 1,
             "max_iterations": max_iterations,
-            "num_steps_per_env": 192, #48, #24,
+            "num_steps_per_env": 48, #48, #24,
             "policy_class_name": "ActorCritic",
             "record_interval": -1,
             "resume": False,
@@ -54,7 +54,6 @@ def get_train_cfg(exp_name, max_iterations):
     }
 
     return train_cfg_dict
-
 
 def get_cfgs():
     env_cfg = {
@@ -106,16 +105,16 @@ def get_cfgs():
     }
     reward_cfg = {
         "cycle_time": 1.0,
-        "target_joint_pos_scale": 0.5, # imitation part
+        "target_joint_pos_scale": 0.4, # imitation part
         "max_contact_force": 1000., # 899.6826 by standing still
         "tracking_sigma": 300., #5., # sensitivity for tracking rewards, lin. and ang. vel.
         "base_height_target": 0.20, #0.2344,
         "feet_height_target": 0.04, # 0.01~0.03, robot 0~209~415mm
         "soft_torque_limit": 0.9, # 通常0.9，力矩超过最大允许力矩的 90%，惩罚超过软限制的部分
         "min_distance": 0.02,  # between feet and knees
-        "max_distance": 0.3, # 0.45*0.415 = 0.187
+        "max_distance": 0.19, # 0.45*0.415 = 0.187
         "reward_scales": {
-            "joint_pos": 0.0,
+            "joint_pos": 0, #0.25,
             "feet_contact_number": 0.03, #1.0,
             
             "feet_air_time": 1.0,
@@ -127,11 +126,11 @@ def get_cfgs():
             "tracking_lin_vel": 0.3, #1.5, 
             "tracking_ang_vel": 0.2, #1.0,
             "vel_mismatch_exp": 0.02, #0.5,
-            "low_speed": 0.02,
+            "low_speed": 0.2,
             "track_vel_hard": 0, #0.5,
             
             "default_joint_pos": 0.01,
-            "orientation": 0.01, #1.0,
+            "orientation": 0.1, #1.0,
             "base_height": 0.15, #0.2,
             
             "base_acc": 0.01, #0.2,
@@ -147,23 +146,16 @@ def get_cfgs():
     }
     command_cfg = {
         "num_commands": 3,
-        "lin_vel_x_range": [-0.05, 0.1], # product max speed 21cm/s
+        "lin_vel_x_range": [-0.05, 0.5], # product max speed 21cm/s
         "lin_vel_y_range": [-0.01, 0.01],
         "ang_vel_range": [-0.0, 0.0], 
     }
-    # command_cfg = {
-    #     "num_commands": 3,
-    #     "lin_vel_x_range": [0.5, 0.5],
-    #     "lin_vel_y_range": [0., 0.],
-    #     "ang_vel_range": [0.0, 0.0],
-    # }
-
     return env_cfg, obs_cfg, reward_cfg, command_cfg
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--exp_name", type=str, default="ainex-walking-all")
+    parser.add_argument("-e", "--exp_name", type=str, default="ainex-walking-circle")
     parser.add_argument("-B", "--num_envs", type=int, default=4096)
     parser.add_argument("--max_iterations", type=int, default=500)
     parser.add_argument("--seed", type=int, default=1)
@@ -178,8 +170,7 @@ def main():
     train_cfg = get_train_cfg(args.exp_name, args.max_iterations)
 
     if args.ckpt == 0 and os.path.exists(log_dir):
-        # shutil.rmtree(log_dir) # do not purge directory
-        pass
+        shutil.rmtree(log_dir) # do not purge directory
     os.makedirs(log_dir, exist_ok=True)
 
     env = AinexEnv(
