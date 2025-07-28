@@ -40,7 +40,7 @@ def get_train_cfg(exp_name, max_iterations):
             "load_run": -1,
             "log_interval": 1,
             "max_iterations": max_iterations,
-            "num_steps_per_env": 48, #48, #24,
+            "num_steps_per_env": 192, #48, #24,
             "policy_class_name": "ActorCritic",
             "record_interval": -1,
             "resume": False,
@@ -83,7 +83,7 @@ def get_cfgs():
         "base_init_pos": [0.0, 0.0, 0.25],
         "base_init_quat": [1.0, 0.0, 0.0, 0.0],
         "episode_length_s": 10.0,
-        "resampling_time_s": 2.0,
+        "resampling_time_s": 3.0,
         "termination_if_pitch_greater_than": 0.7,
         "termination_if_roll_greater_than": 0.7,
         "termination_if_height_lower_than": 0.15,
@@ -105,7 +105,7 @@ def get_cfgs():
     }
     reward_cfg = {
         "cycle_time": 1.0,
-        "target_joint_pos_scale": 0.4, # imitation part
+        "target_joint_pos_scale": 0.5, # imitation part
         "max_contact_force": 1000., # 899.6826 by standing still
         "tracking_sigma": 300., #5., # sensitivity for tracking rewards, lin. and ang. vel.
         "base_height_target": 0.20, #0.2344,
@@ -114,7 +114,7 @@ def get_cfgs():
         "min_distance": 0.02,  # between feet and knees
         "max_distance": 0.19, # 0.45*0.415 = 0.187
         "reward_scales": {
-            "joint_pos": 0, #0.25,
+            "joint_pos": 0.1, #0.25,
             "feet_contact_number": 0.03, #1.0,
             
             "feet_air_time": 1.0,
@@ -123,14 +123,14 @@ def get_cfgs():
             "feet_distance": 0.01, #0.2,
             "knee_distance": 0.05, #0.2,
                         
-            "tracking_lin_vel": 0.3, #1.5, 
+            "tracking_lin_vel": 0.4, #1.5, 
             "tracking_ang_vel": 0.2, #1.0,
             "vel_mismatch_exp": 0.02, #0.5,
             "low_speed": 0.2,
             "track_vel_hard": 0, #0.5,
             
             "default_joint_pos": 0.01,
-            "orientation": 0.1, #1.0,
+            "orientation": 0.2, #1.0,
             "base_height": 0.15, #0.2,
             
             "base_acc": 0.01, #0.2,

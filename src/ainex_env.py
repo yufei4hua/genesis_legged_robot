@@ -386,6 +386,7 @@ class AinexEnv:
         joint_pos = self.dof_pos.clone()
         pos_target = self.ref_dof_pos.clone()
         diff = joint_pos - self.default_dof_pos - pos_target
+        diff = diff[:,[2,3,8,9]] # take only hip and knee joints
         r = torch.exp(-2 * torch.norm(diff, dim=1)) - 0.2 * torch.norm(diff, dim=1).clamp(0, 0.5)
         return r
     
@@ -478,8 +479,10 @@ class AinexEnv:
         Tracks linear velocity commands along the xy axes. 
         Calculates a reward based on how closely the robot's linear velocity matches the commanded values.
         """ # _resample_commands, lin_vel_x_range and lin_vel_y_range
+        vel_bias = torch.zeros_like(self.commands[:, :2])
+        vel_bias[:, 1] = -1.0*self.commands[:, 0] # add a virtual velocity command along -y, encourage going right (to correct turning left behaviour)
         lin_vel_error = torch.sum(torch.square(
-            self.commands[:, :2] - self.base_lin_vel[:, :2]), dim=1) / (torch.norm(self.commands[:, :2], dim=1)+0.05)
+            self.commands[:, :2] + vel_bias - self.base_lin_vel[:, :2]), dim=1) / (torch.norm(self.commands[:, :2], dim=1)+0.05)
         return torch.exp(-lin_vel_error * self.reward_cfg["tracking_sigma"])
     
     def _reward_tracking_ang_vel(self):
@@ -567,7 +570,7 @@ class AinexEnv:
         Calculates the reward for maintaining a flat base orientation. It penalizes deviation 
         from the desired base orientation using the base euler angles and the projected gravity vector.
         """
-        quat_mismatch = torch.exp(-torch.sum(torch.abs(self.base_euler[:, :2]), dim=1) * 10)
+        quat_mismatch = torch.exp(-torch.sum(torch.abs(self.base_euler[:, :2]), dim=1) * 30)
         orientation = torch.exp(-torch.norm(self.projected_gravity[:, :2], dim=1) * 20)
         return (quat_mismatch + orientation) / 2.
 
