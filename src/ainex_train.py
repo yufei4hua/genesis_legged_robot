@@ -177,7 +177,7 @@ def main():
     env_cfg, obs_cfg, reward_cfg, command_cfg = get_cfgs()
     train_cfg = get_train_cfg(args.exp_name, args.max_iterations)
 
-    if os.path.exists(log_dir):
+    if args.ckpt == 0 and os.path.exists(log_dir):
         # shutil.rmtree(log_dir) # do not purge directory
         pass
     os.makedirs(log_dir, exist_ok=True)
