@@ -115,7 +115,7 @@ def get_cfgs():
         "min_distance": 0.02,  # between feet and knees
         "max_distance": 0.3, # 0.45*0.415 = 0.187
         "reward_scales": {
-            "joint_pos": 0.05,
+            "joint_pos": 0.0,
             "feet_contact_number": 0.03, #1.0,
             
             "feet_air_time": 1.0,
@@ -127,7 +127,7 @@ def get_cfgs():
             "tracking_lin_vel": 0.3, #1.5, 
             "tracking_ang_vel": 0.2, #1.0,
             "vel_mismatch_exp": 0.02, #0.5,
-            "low_speed": 0.1,
+            "low_speed": 0.02,
             "track_vel_hard": 0, #0.5,
             
             "default_joint_pos": 0.01,
@@ -147,7 +147,7 @@ def get_cfgs():
     }
     command_cfg = {
         "num_commands": 3,
-        "lin_vel_x_range": [-0.05, 0.10], # product max speed 21cm/s
+        "lin_vel_x_range": [-0.05, 0.1], # product max speed 21cm/s
         "lin_vel_y_range": [-0.01, 0.01],
         "ang_vel_range": [-0.0, 0.0], 
     }
@@ -207,6 +207,8 @@ if __name__ == "__main__":
 python src/ainex_train.py
 python src/ainex_train.py --headless # no viewer
 python src/ainex_train.py --headless --num_envs 4096
+python src/ainex_train.py -e no2000 --headless --num_envs 1024 --max_iterations 2000
+python src/ainex_train.py -e lowspeed002 --headless --num_envs 1024 --max_iterations 2000
 
 # testing
 python src/ainex_train.py -e test --num_envs 2 --max_iterations 1
