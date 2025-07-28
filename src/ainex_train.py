@@ -106,16 +106,16 @@ def get_cfgs():
     }
     reward_cfg = {
         "cycle_time": 1.0,
-        "target_joint_pos_scale": 0.4, # imitation part
+        "target_joint_pos_scale": 0.5, # imitation part
         "max_contact_force": 1000., # 899.6826 by standing still
         "tracking_sigma": 300., #5., # sensitivity for tracking rewards, lin. and ang. vel.
-        "base_height_target": 0.2044, #0.2344,
+        "base_height_target": 0.20, #0.2344,
         "feet_height_target": 0.04, # 0.01~0.03, robot 0~209~415mm
         "soft_torque_limit": 0.9, # 通常0.9，力矩超过最大允许力矩的 90%，惩罚超过软限制的部分
         "min_distance": 0.02,  # between feet and knees
         "max_distance": 0.3, # 0.45*0.415 = 0.187
         "reward_scales": {
-            "joint_pos": 0.1,
+            "joint_pos": 0.05,
             "feet_contact_number": 0.03, #1.0,
             
             "feet_air_time": 1.0,
@@ -127,7 +127,7 @@ def get_cfgs():
             "tracking_lin_vel": 0.3, #1.5, 
             "tracking_ang_vel": 0.2, #1.0,
             "vel_mismatch_exp": 0.02, #0.5,
-            "low_speed": 0.2,
+            "low_speed": 0.1,
             "track_vel_hard": 0, #0.5,
             
             "default_joint_pos": 0.01,
@@ -147,7 +147,7 @@ def get_cfgs():
     }
     command_cfg = {
         "num_commands": 3,
-        "lin_vel_x_range": [-0.05, 0.5], # product max speed 21cm/s
+        "lin_vel_x_range": [-0.05, 0.10], # product max speed 21cm/s
         "lin_vel_y_range": [-0.01, 0.01],
         "ang_vel_range": [-0.0, 0.0], 
     }
