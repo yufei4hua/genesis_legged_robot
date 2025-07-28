@@ -40,7 +40,7 @@ def get_train_cfg(exp_name, max_iterations):
             "load_run": -1,
             "log_interval": 1,
             "max_iterations": max_iterations,
-            "num_steps_per_env": 192, #48, #24,
+            "num_steps_per_env": 48, #48, #24,
             "policy_class_name": "ActorCritic",
             "record_interval": -1,
             "resume": False,
@@ -98,7 +98,7 @@ def get_cfgs():
         "num_obs": 61*5,
         "num_privileged_obs": 64*5,
         "obs_scales": {
-            "lin_vel": 2.0,
+            "lin_vel": 10.0,
             "ang_vel": 0.25,
             "dof_pos": 1.0,
             "dof_vel": 0.05,
@@ -124,14 +124,14 @@ def get_cfgs():
             "feet_distance": 0.01, #0.2,
             "knee_distance": 0.05, #0.2,
                         
-            "tracking_lin_vel": 0.3, #1.5, 
-            "tracking_ang_vel": 0.2, #1.0,
+            "tracking_lin_vel": 0.4, #1.5, 
+            "tracking_ang_vel": 0.1, #1.0,
             "vel_mismatch_exp": 0.02, #0.5,
-            "low_speed": 0.02,
+            "low_speed": 0.1,
             "track_vel_hard": 0, #0.5,
             
             "default_joint_pos": 0.01,
-            "orientation": 0.01, #1.0,
+            "orientation": 0.1, #1.0,
             "base_height": 0.15, #0.2,
             
             "base_acc": 0.01, #0.2,
