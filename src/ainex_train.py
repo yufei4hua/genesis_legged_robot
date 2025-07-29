@@ -40,7 +40,7 @@ def get_train_cfg(exp_name, max_iterations):
             "load_run": -1,
             "log_interval": 1,
             "max_iterations": max_iterations,
-            "num_steps_per_env": 192, #48, #24,
+            "num_steps_per_env": 96, #48, #24,
             "policy_class_name": "ActorCritic",
             "record_interval": -1,
             "resume": False,
@@ -123,8 +123,8 @@ def get_cfgs():
             "feet_distance": 0.01, #0.2,
             "knee_distance": 0.05, #0.2,
                         
-            "tracking_lin_vel": 0.4, #1.5, 
-            "tracking_ang_vel": 0.2, #1.0,
+            "tracking_lin_vel": 0.5, #1.5, 
+            "tracking_ang_vel": 0.4, #1.0,
             "vel_mismatch_exp": 0.02, #0.5,
             "low_speed": 0.2,
             "track_vel_hard": 0, #0.5,
@@ -146,7 +146,7 @@ def get_cfgs():
     }
     command_cfg = {
         "num_commands": 3,
-        "lin_vel_x_range": [-0.05, 0.5], # product max speed 21cm/s
+        "lin_vel_x_range": [-0.05, 0.3], # product max speed 21cm/s
         "lin_vel_y_range": [-0.01, 0.01],
         "ang_vel_range": [-0.0, 0.0], 
     }
@@ -155,9 +155,9 @@ def get_cfgs():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--exp_name", type=str, default="ainex-walking-circle")
+    parser.add_argument("-e", "--exp_name", type=str, default="ainex-walking-circle-bias")
     parser.add_argument("-B", "--num_envs", type=int, default=4096)
-    parser.add_argument("--max_iterations", type=int, default=500)
+    parser.add_argument("--max_iterations", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--headless", action="store_true", default=False)
     parser.add_argument("--ckpt", type=int, default=0)

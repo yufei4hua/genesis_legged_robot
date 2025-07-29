@@ -480,7 +480,7 @@ class AinexEnv:
         Calculates a reward based on how closely the robot's linear velocity matches the commanded values.
         """ # _resample_commands, lin_vel_x_range and lin_vel_y_range
         vel_bias = torch.zeros_like(self.commands[:, :2])
-        vel_bias[:, 1] = -1.0*self.commands[:, 0] # add a virtual velocity command along -y, encourage going right (to correct turning left behaviour)
+        # vel_bias[:, 1] = -1.0*self.commands[:, 0] # add a virtual velocity command along -y, encourage going right (to correct turning left behaviour)
         lin_vel_error = torch.sum(torch.square(
             self.commands[:, :2] + vel_bias - self.base_lin_vel[:, :2]), dim=1) / (torch.norm(self.commands[:, :2], dim=1)+0.05)
         return torch.exp(-lin_vel_error * self.reward_cfg["tracking_sigma"])
@@ -490,9 +490,11 @@ class AinexEnv:
         Tracks angular velocity commands for yaw rotation.
         Computes a reward based on how closely the robot's angular velocity matches the commanded yaw values.
         """   
+        ang_bias = torch.zeros_like(self.commands[:, 2]) 
+        # ang_bias = -1*torch.ones_like(self.commands[:, 2]) # add a virtual angular command, encourage going right (to correct turning left behaviour)
         ang_vel_error = torch.square(
-            self.commands[:, 2] - self.base_ang_vel[:, 2]) / (torch.abs(self.commands[:, 2])+0.02)
-        return torch.exp(-ang_vel_error * self.reward_cfg["tracking_sigma"])
+            self.commands[:, 2] + ang_bias - self.base_ang_vel[:, 2]) / (torch.abs(self.commands[:, 2])+0.02)
+        return torch.exp(-ang_vel_error * 0.1 * self.reward_cfg["tracking_sigma"])
     
     def _reward_vel_mismatch_exp(self):
         """

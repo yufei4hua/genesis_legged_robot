@@ -15,7 +15,7 @@ from ainex_train import get_cfgs
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e", "--exp_name", type=str, default="ainex-walking-all")
+    parser.add_argument("-e", "--exp_name", type=str, default="ainex-walking-circle-bias")
     parser.add_argument("--ckpt", type=int, default=200)
     args = parser.parse_args()
 
@@ -24,6 +24,13 @@ def main():
     log_dir = f"logs/{args.exp_name}"
     env_cfg, obs_cfg, reward_cfg, command_cfg, train_cfg = pickle.load(open(f"logs/{args.exp_name}/cfgs.pkl", "rb"))
     env_cfg, obs_cfg, reward_cfg, command_cfg = get_cfgs()
+
+    command_cfg = {
+        "num_commands": 3,
+        "lin_vel_x_range": [0.3, 0.4], # product max speed 21cm/s
+        "lin_vel_y_range": [-0.0, 0.0],
+        "ang_vel_range": [0.0, 0.0], 
+    }
 
     env = AinexEnv(
         num_envs=1,
