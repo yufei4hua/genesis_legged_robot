@@ -17,6 +17,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--exp_name", type=str, default="ainex-walking-circle-bias")
     parser.add_argument("--ckpt", type=int, default=200)
+    parser.add_argument("--vel", type=float, default=0.2)
     args = parser.parse_args()
 
     gs.init()
@@ -27,7 +28,7 @@ def main():
 
     command_cfg = {
         "num_commands": 3,
-        "lin_vel_x_range": [0.3, 0.4], # product max speed 21cm/s
+        "lin_vel_x_range": [args.vel, args.vel], # product max speed 21cm/s
         "lin_vel_y_range": [-0.0, 0.0],
         "ang_vel_range": [0.0, 0.0], 
     }
